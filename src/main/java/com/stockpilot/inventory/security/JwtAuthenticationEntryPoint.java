@@ -1,7 +1,5 @@
 package com.stockpilot.inventory.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stockpilot.inventory.dto.common.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
@@ -19,7 +17,6 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
                          AuthenticationException authException) throws IOException {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        new ObjectMapper().writeValue(response.getOutputStream(),
-                ApiResponse.error("Unauthorized - Please login to access this resource"));
+        response.getWriter().write("{\"success\":false,\"message\":\"Unauthorized - Please login to access this resource\"}");
     }
 }

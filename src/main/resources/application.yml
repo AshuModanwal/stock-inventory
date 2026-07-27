@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: stockpilot-inventory
+
+  profiles:
+    active: dev
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+    time-zone: Asia/Kolkata
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+app:
+  name: StockPilot
+  version: 1.0.0
+
+  jwt:
+    secret: ${JWT_SECRET:veryLongSecretKeyForJWTTokenGeneration2024StockPilotInventoryManagementSystemSecureKey}
+    access-token-expiry: 86400000    # 24 hours
+    refresh-token-expiry: 604800000  # 7 days
+
+  cors:
+    allowed-origins: http://localhost:3000,http://localhost:5173
+    allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
+    allowed-headers: "*"
+
+  upload:
+    dir: ./uploads
+    max-size: 10485760  # 10MB
+    allowed-types: image/jpeg,image/png,image/webp,application/pdf
+
+  invoice:
+    prefix: INV
+    company-name: StockPilot Platform
+
+  platform:
+    admin-email: admin@stockpilot.com
+    admin-password: Admin@123456

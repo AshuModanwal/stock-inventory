@@ -8,15 +8,27 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "invoices")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Table(
+        name = "invoices",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_company_invoice_number",
+                        columnNames = {"company_id", "invoice_number"}
+                )
+        }
+)
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Invoice extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "invoice_number", nullable = false, unique = true, length = 30)
+    @Column(name = "invoice_number", nullable = false, length = 30)
     private String invoiceNumber;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -54,20 +66,20 @@ public class Invoice extends BaseEntity {
     @Column(nullable = false)
     private Double subtotal;
 
-    @Column(name = "tax_amount")
     @Builder.Default
+    @Column(name = "tax_amount")
     private Double taxAmount = 0.0;
 
-    @Column(name = "discount_amount")
     @Builder.Default
+    @Column(name = "discount_amount")
     private Double discountAmount = 0.0;
 
     @Column(name = "total_amount", nullable = false)
     private Double totalAmount;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    @Builder.Default
     private InvoiceStatus status = InvoiceStatus.GENERATED;
 
     @Column(name = "due_date")

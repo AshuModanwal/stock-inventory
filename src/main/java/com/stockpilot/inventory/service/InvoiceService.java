@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @Service
@@ -26,15 +27,30 @@ public class InvoiceService {
     private final SaleItemRepository saleItemRepository;
 
     @Transactional
-    public Invoice generateInvoice(Sale sale, Company company, Customer customer) {
+    public Invoice generateInvoice(Sale sale, Company ignoredCompany, Customer customer) {
         // Generate invoice number: PREFIX-YYMM-XXXXXX
-        String prefix = company.getInvoicePrefix() != null ? company.getInvoicePrefix() : "INV";
-        String dateStr = LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyMM"));
-        Long nextNum = company.getNextInvoiceNumber();
-        String invoiceNumber = prefix + "-" + dateStr + "-" + String.format("%06d", nextNum);
+        Company company = companyRepository.findByIdForUpdate(sale.getCompany().getId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Company", "id", sale.getCompany().getId()));
 
-        // Increment counter
-        company.setNextInvoiceNumber(nextNum + 1);
+        String prefix = company.getInvoicePrefix() != null
+                ? company.getInvoicePrefix()
+                : "INV";
+
+        String dateStr = LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyMM"));
+
+        Long nextNumber = company.getNextInvoiceNumber();
+
+        String invoiceNumber = String.format(
+                "%s-%s-%06d",
+                prefix,
+                dateStr,
+                nextNumber
+        );
+
+        company.setNextInvoiceNumber(nextNumber + 1);
+
         companyRepository.save(company);
 
         // Build address strings

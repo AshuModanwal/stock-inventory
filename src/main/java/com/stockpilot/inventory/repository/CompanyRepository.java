@@ -7,12 +7,29 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import java.util.Optional;
 
+import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.repository.query.Param;
+
 public interface CompanyRepository extends JpaRepository<Company, Long> {
+
     Optional<Company> findByEmail(String email);
+
     boolean existsByEmail(String email);
+
     boolean existsByGstin(String gstin);
+
     Page<Company> findByActiveTrue(Pageable pageable);
 
-    @Query("SELECT c FROM Company c WHERE LOWER(c.name) LIKE LOWER(CONCAT('%',:q,'%')) OR LOWER(c.email) LIKE LOWER(CONCAT('%',:q,'%'))")
+    @Query("""
+        SELECT c
+        FROM Company c
+        WHERE LOWER(c.name) LIKE LOWER(CONCAT('%',:q,'%'))
+           OR LOWER(c.email) LIKE LOWER(CONCAT('%',:q,'%'))
+    """)
     Page<Company> search(String q, Pageable pageable);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT c FROM Company c WHERE c.id = :id")
+    Optional<Company> findByIdForUpdate(@Param("id") Long id);
 }
